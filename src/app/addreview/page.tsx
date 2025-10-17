@@ -1,4 +1,5 @@
 // components/ReviewForm.tsx
+"use client";
 import { useState, useRef } from 'react';
 
 interface ReviewFormData {
@@ -134,22 +135,55 @@ export default function ReviewForm({ foodId, foodName, onSubmit, onCancel }: Rev
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Add Review for {foodName}</h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* User Name */}
+        
         <div>
           <label htmlFor="userName" className="block text-sm font-medium text-gray-700 mb-1">
-            Your Name *
+            Restaurant Name *
           </label>
           <input
             type="text"
-            id="userName"
-            name="userName"
+            id="restaurant"
+            name="restaurant"
             value={formData.userName}
             onChange={handleInputChange}
             required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E52020] focus:border-transparent"
-            placeholder="Enter your name"
+            placeholder="Enter name of the restaurant"
           />
         </div>
+
+        <div>
+          <label htmlFor="userName" className="block text-sm font-medium text-gray-700 mb-1">
+            Food Name *
+          </label>
+          <input
+            type="text"
+            id="food"
+            name="food"
+            value={formData.userName}
+            onChange={handleInputChange}
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E52020] focus:border-transparent"
+            placeholder="Enter name of the food"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="userName" className="block text-sm font-medium text-gray-700 mb-1">
+            Restaurant Location *
+          </label>
+          <input
+            type="text"
+            id="location"
+            name="location"
+            value={formData.userName}
+            onChange={handleInputChange}
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E52020] focus:border-transparent"
+            placeholder="Where is the location at?"
+          />
+        </div>
+
 
         {/* Rating */}
         <div>
