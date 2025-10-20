@@ -1,4 +1,5 @@
 "use client";
+import axios from 'axios';
 import Image from 'next/image';
 import Link from 'next/link'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -18,8 +19,24 @@ interface FoodSearchProps {
   foodItems: FoodItem[];
 }
 
-const Home = ({ foodItems }: FoodSearchProps) => {
-    const filterItem = ["Ethiopian Food", "Fast Food", "Salad", "Snaks", "Ice Cream"];
+const API_BASE = 'http://localhost:5000/api';
+
+interface Data {
+    media_id: number;
+    file_name: string;
+    media_type: string;
+    size_bytes: string;
+}
+
+const Home = () => {
+    // const filterItem = ["Ethiopian Food", "Fast Food", "Salad", "Snaks", "Ice Cream"];
+    const [searchResults, setSearchResults] = useState<Data[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [filters, setFilters] = useState({
+        fileType: 'all',
+        date: '',
+        location: ''
+    });
     const data = [
         {
             id: 1,
@@ -92,6 +109,51 @@ const Home = ({ foodItems }: FoodSearchProps) => {
         console.log('Fetch data');
     }, [])
 
+    const searchMedia = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      
+      if (filters.fileType && filters.fileType !== 'all') {
+        params.append('fileType', filters.fileType);
+      }
+      if (filters.date) {
+        params.append('date', filters.date);
+      }
+      if (filters.location) {
+        params.append('location', filters.location);
+      }
+      
+      const response = await axios.get(`${API_BASE}/search?${params}`);
+      setSearchResults(response.data.data || []);
+    } catch (error) {
+      console.error('Search error:', error);
+      alert('Error searching media files');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+    const handleFilterChange = (key: any, value: any) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const handleViewFile = (file: File) => {
+    if (file.media_type === 'IMAGE') {
+      window.open(`${API_BASE}/file/${file.media_id}`, '_blank');
+    } else {
+      alert(`Video files need special handling. File: ${file.file_name}`);
+    }
+  };
+
+  useEffect(() => {
+    searchMedia();
+  }, []);
+
     const filteredFoodItems = useMemo(() => {
         if (!searchQuery.trim()) {
             return reviews;
@@ -119,14 +181,47 @@ const Home = ({ foodItems }: FoodSearchProps) => {
     <div className=''>
         <div className='w-full md:flex justify-between p-10 bg-white'>
             <div className='md:w-1/2'>
-                <h3 className='text-[#E52020] font-bold text-4xl'>Enibla Review</h3>
-                <p className='text-gray-500 md:w-2/3'>Discover your next great meal, share your own experience, and help others find their perfect spot.</p>
+                <h3 className='text-[#E52020] font-bold text-4xl'>Google V 2.0</h3>
+                <p className='text-gray-500 md:w-2/3'>This is a multimedia database implementation project implemented by CS_2025 Computer Science Masters students.</p>
 
             </div>
             {/* Search Results Count */}
             <div className="text-sm text-gray-600 mb-4">
-                {filteredFoodItems?.length} {filteredFoodItems?.length === 1 ? 'item' : 'items'} found
+                {searchResults?.length} {searchResults?.length === 1 ? 'item' : 'items'} found
                 {searchQuery && ` for "${searchQuery}"`}
+          <div className="filter-group">
+            <label>File Type:</label>
+            <select 
+              value={filters.fileType} 
+              onChange={(e) => handleFilterChange('fileType', e.target.value)}
+            >
+              <option value="all">All Types</option>
+              <option value="IMAGE">Images</option>
+              <option value="VIDEO">Videos</option>
+              <option value="OTHER-a">Other</option>
+            </select>
+          </div>
+          <div className="filter-group">
+            <label>Date (DD/MM/YYYY):</label>
+            <input 
+              type="text" 
+              placeholder="01/01/2018"
+              value={filters.date}
+              onChange={(e) => handleFilterChange('date', e.target.value)}
+            />
+          </div>
+        <div className="filter-group">
+            <label>Location:</label>
+            <input 
+              type="text" 
+              placeholder="Addis"
+              value={filters.location}
+              onChange={(e) => handleFilterChange('location', e.target.value)}
+            />
+          </div>
+          <button onClick={searchMedia} disabled={loading}>
+            {loading ? 'Searching...' : 'Search'}
+          </button>
             </div>
             <div className='md:w-1/2 text-end space-y-3'>
                 <input
@@ -154,17 +249,16 @@ const Home = ({ foodItems }: FoodSearchProps) => {
         </div> */}
         
         <div className='p-10 grid grid-cols-5 gap-8'>
-            { filteredFoodItems?.map((item) => (
-                <div key={item.id}>
-                    <img 
-                        src={item.media}
-                        alt="food image" 
-                        className='h-42 w-full object-cover rounded-md'/>
-                    <h3 className='text-xl font-bold'>{item.restaurant}</h3>
-                    <h4>Food: {item.food}</h4>
-                    <h4>Location: {item.location}</h4>
+            { searchResults?.map((item) => (
+                <div key={item.media_id}>
+                   <button onClick={() => handleViewFile(item)}>
+                        View
+                    </button>
+                    <h3 className='text-xl font-bold'>{item.file_name}</h3>
+                    <h4>Food: {item.media_type}</h4>
+                    <h4>Location: {item.size_bytes}</h4>
                     <h4 className='text-[#E52020]'>rating: {item.rating}/5</h4>
-                    <Link href={`/${item.id}`}>View Detail</Link>
+                    <Link href={`/${item.media_id}`}>View Detail</Link>
                 </div>))
             } 
             {filteredFoodItems?.length === 0 && searchQuery && (

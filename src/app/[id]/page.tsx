@@ -17,7 +17,7 @@ const Detail = () => {
             <div className='md:w-1/2 text-end space-y-3'>
                 <div>
                     <Link 
-                        href='/ghost'
+                        href='/addreview'
                         className='bg-[#E52020] text-white px-3 py-1 rounded-md'>Add review</Link>
                 </div>
                 
